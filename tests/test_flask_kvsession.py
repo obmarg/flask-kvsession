@@ -105,6 +105,10 @@ def create_app(store):
     def is_new_session():
         return str(session.new)
 
+    @app.route('/is-modified-session/')
+    def is_modified_session():
+        return str(session.modified)
+
     return app
 
 
@@ -428,6 +432,16 @@ class TestSampleApp(unittest.TestCase):
         ext.init_app(app)
 
         self.assertIs(self.store, app.kvsession_store)
+
+    def test_new_session_not_modified(self):
+        rv = self.client.get('/is-modified-session/')
+        self.assertEqual(rv.data, 'False')
+
+    def test_existing_session_not_modified(self):
+        self.client.get('/store-in-session/k1/value1/')
+        rv = self.client.get('/is-modified-session/')
+        self.assertEqual(rv.data, 'False')
+
 
 class TestCookieFlags(unittest.TestCase):
     def setUp(self):
